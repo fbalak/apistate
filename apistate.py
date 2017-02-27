@@ -69,7 +69,9 @@ for source in sources:
                             # print(line)
                             p = re.search(source['pattern'], line)
                             if source['placement'] == "begin":
-                                url = line[:p.span()[1]].strip().split(' ')[0]\
+                                url = line[:p.span()[1]]
+                                url = re.sub('^ {8}', ":integration_id/", url)
+                                url = url.strip().split(' ')[0]\
                                     .strip("-").strip("\",").strip("'").strip(":")
                             else:
                                 url = line[p.span()[1]:].split(' ')[0]\
