@@ -15,7 +15,7 @@ sources = [
             "column": "implemented",
             "placement": "end"},
         {"files": glob.glob('../usmqe-tests/usmqe/api/tendrlapi/*'),
-            "pattern": '(P|p)attern: *"',
+            "pattern": 'pattern = "*"',
             "type": "file",
             "column": "covered",
             "placement": "end"},
@@ -35,8 +35,10 @@ aliases = [
         {"pattern": ".{8}-.{4}-.{4}-.{4}-.{12}", "repl": ":integration_id"},
         {"pattern": ":cluster_id:", "repl": ":integration_id"},
         {"pattern": ":job_id", "repl": ":integration_id"},
+        {"pattern": "\{\}", "repl": ":integration_id"},
         ]
 
+invalid = ["", ":integration_id/GetVol", "5291c055-70d3-4450-9769-2f6"]
 
 table = {}
 
@@ -66,14 +68,16 @@ for source in sources:
                             if source['placement'] == "begin":
                                 url = line[:p.span()[1]]
                                 url = re.sub('^ {8}', ":integration_id/", url)
+                                url = url.split('"')[0]
                                 url = url.strip().split(' ')[0]\
                                     .strip("-").strip("\",").strip("'").strip(":")
                             else:
                                 url = line[p.span()[1]:].split(' ')[0]\
                                     .strip("-").strip("\",").strip("'")
+                                url = url.split('"')[0]
 
                             # print("{}".format(url))
-                            if url not in table[source["column"]]:
+                            if url not in table[source["column"]] and url not in invalid:
                                 table[source["column"]].append(url)
                                 # print(line)
                         except Exception as err:
