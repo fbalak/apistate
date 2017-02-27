@@ -7,19 +7,33 @@ sources = [
         {"files": glob.glob('../api/docs/*'),
             "pattern": 'api/1.0/',
             "type": "file",
-            "column": "documented"},
+            "column": "documented",
+            "placement": "end"},
         {"files": glob.glob('../api/*'),
             "pattern": 'get \'/',
             "type": "file",
-            "column": "implemented"},
+            "column": "implemented",
+            "placement": "end"},
         {"files": glob.glob('../usmqe-tests/usmqe/api/tendrlapi/*'),
             "pattern": '(P|p)attern: *"',
             "type": "file",
-            "column": "covered"},
+            "column": "covered",
+            "placement": "end"},
         {"url": "http://hostname/api/1.0/Flows",
             "pattern": 'flows',
             "type": "web",
-            "column": "flows"}
+            "column": "flows",
+            "placement": "end"},
+        {"files": glob.glob('../gluster-integration/tendrl/gluster_integration/objects/definition/gluster.py'),
+            "pattern": '[a-zA-Z0-9]+: +atoms: +- ',
+            "type": "file",
+            "column": "flows",
+            "placement": "begin"},
+        {"files": glob.glob('../ceph-integration/tendrl/ceph_integration/objects/definition/ceph.py'),
+            "pattern": '[a-zA-Z0-9]+: +atoms: +- ',
+            "type": "file",
+            "column": "flows",
+            "placement": "begin"}
         ]
 
 aliases = [
@@ -54,12 +68,17 @@ for source in sources:
                                     line)
                             # print(line)
                             p = re.search(source['pattern'], line)
-                            url = line[p.span()[1]:].split(' ')[0]\
-                                .strip("-").strip("\",").strip("'")
+                            if source['placement'] == "begin":
+                                url = line[:p.span()[1]].strip().split(' ')[0]\
+                                    .strip("-").strip("\",").strip("'").strip(":")
+                            else:
+                                url = line[p.span()[1]:].split(' ')[0]\
+                                    .strip("-").strip("\",").strip("'")
 
                             # print("{}".format(url))
                             if url not in table[source["column"]]:
                                 table[source["column"]].append(url)
+                                # print(line)
                         except Exception as err:
                             # print("{}".format(err))
                             pass
