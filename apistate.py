@@ -1,46 +1,49 @@
+import argparse
 import os
 import re
 import glob
 import requests
+import sys
+import inspect
+import importlib
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--api', type=str, action="store", required=True,
+                    help='Path to tendrl api repository.')
+parser.add_argument('--tests', type=str, action="store", required=True,
+                    help='Path to tendrl usemqe-tests repository.')
+
 
 sources = [
-        {"files": glob.glob('../api/docs/*'),
+        {"files": glob.glob(os.path.join(parser.parse_args().api, "docs", "*")),
             "pattern": 'api/1.0/',
             "type": "file",
             "column": "documented",
             "placement": "end"},
-        {"files": glob.glob('../api/*'),
-            "pattern": 'get \'/',
-            "type": "file",
-            "column": "implemented",
-            "placement": "end"},
-        {"files": glob.glob('../usmqe-tests/usmqe/api/tendrlapi/*'),
-            "pattern": 'pattern = "*"',
+        {"files": glob.glob(os.path.join(
+                parser.parse_args().tests, "usmqe", "api", "tendrlapi", "*")),
+            "pattern": '(P|p)attern = *"',
             "type": "file",
             "column": "covered",
             "placement": "end"},
-        {"files": glob.glob('../gluster-integration/tendrl/gluster_integration/objects/definition/gluster.py'),
-            "pattern": '[a-zA-Z0-9]+: +atoms: +- ',
-            "type": "file",
-            "column": "flows",
-            "placement": "begin"},
-        {"files": glob.glob('../ceph-integration/tendrl/ceph_integration/objects/definition/ceph.py'),
-            "pattern": '[a-zA-Z0-9]+: +atoms: +- ',
-            "type": "file",
-            "column": "flows",
-            "placement": "begin"}
         ]
 
 aliases = [
         {"pattern": ".{8}-.{4}-.{4}-.{4}-.{12}", "repl": ":integration_id"},
         {"pattern": ":cluster_id:", "repl": ":integration_id"},
+        {"pattern": ":cluster_id", "repl": ":integration_id"},
         {"pattern": ":job_id", "repl": ":integration_id"},
+        {"pattern": "thardy", "repl": ":username"},
+        {"pattern": "{username}", "repl": ":username"},
         {"pattern": "\{\}", "repl": ":integration_id"},
         ]
 
-invalid = ["", ":integration_id/GetVol", "5291c055-70d3-4450-9769-2f6"]
+invalid = ["", ":integration_id/GetVol", "5291c055-70d3-4450-9769-2f6",
+           "users/:username----------Sample",
+           ":integration_id/CephCreatePoolSample"]
 
 table = {}
+imports = []
 
 for source in sources:
     if source["column"] not in table:
@@ -58,6 +61,11 @@ for source in sources:
                                 lines[i+1],
                                 lines[i+2])
                             line = line.replace("\n", "")
+                            run = re.search("run: [a-zA-Z0-9-._]*", line)
+                            try:
+                                imports.append(line[run.start()+5:run.end()])
+                            except:
+                                pass
                             for alias in aliases:
                                 line = re.sub(
                                     alias["pattern"],
@@ -67,27 +75,34 @@ for source in sources:
                             p = re.search(source['pattern'], line)
                             if source['placement'] == "begin":
                                 url = line[:p.span()[1]]
-                                url = re.sub('^ {8}', ":integration_id/", url)
                                 url = url.split('"')[0]
                                 url = url.strip().split(' ')[0]\
-                                    .strip("-").strip("\",").strip("'").strip(":")
+                                .strip("-").strip("\",")\
+                                .strip("'").strip(":")
                             else:
                                 url = line[p.span()[1]:].split(' ')[0]\
                                     .strip("-").strip("\",").strip("'")
                                 url = url.split('"')[0]
+                            try:
+                                url = source['prefix']+url
+                            except:
+                                pass
 
-                            # print("{}".format(url))
-                            if url not in table[source["column"]] and url not in invalid:
+                            if url not in table[source["column"]]\
+                            and url not in invalid:
                                 table[source["column"]].append(url)
-                                # print(line)
+
                         except Exception as err:
-                            # print("{}".format(err))
                             pass
 
     elif source["type"] == "web":
         data = requests.get(source["url"]).json()
         for i in data[source["pattern"]]:
             table[source["column"]].append(i["name"])
+
+    elif source["type"] == "add":
+        for i in source["pattern"]:
+            table[source["column"]].append(i)
 
 
 used = {}
