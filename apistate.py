@@ -4,8 +4,6 @@ import re
 import glob
 import requests
 import sys
-import inspect
-import importlib
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--api', type=str, action="store", required=True,
@@ -22,25 +20,25 @@ sources = [
             "placement": "end"},
         {"files": glob.glob(os.path.join(
                 parser.parse_args().tests, "usmqe", "api", "tendrlapi", "*")),
-            "pattern": '(P|p)attern = *"',
+            "pattern": 'pattern\s*=\s*"',
             "type": "file",
             "column": "covered",
             "placement": "end"},
         ]
 
 aliases = [
-        {"pattern": ".{8}-.{4}-.{4}-.{4}-.{12}", "repl": ":integration_id"},
-        {"pattern": ":cluster_id:", "repl": ":integration_id"},
-        {"pattern": ":cluster_id", "repl": ":integration_id"},
-        {"pattern": ":job_id", "repl": ":integration_id"},
-        {"pattern": "thardy", "repl": ":username"},
-        {"pattern": "{username}", "repl": ":username"},
-        {"pattern": "\{\}", "repl": ":integration_id"},
+        {"pattern": ".{8}-.{4}-.{4}-.{4}-.{12}", "repl": ":id"},
+        {"pattern": ":cluster_id:", "repl": ":id"},
+        {"pattern": ":cluster_id", "repl": ":id"},
+        {"pattern": ":job_id", "repl": ":id"},
+        {"pattern": "thardy", "repl": ":id"},
+        {"pattern": "{username}", "repl": ":id"},
+        {"pattern": "\{\}", "repl": ":id"},
         ]
 
-invalid = ["", ":integration_id/GetVol", "5291c055-70d3-4450-9769-2f6",
-           "users/:username----------Sample",
-           ":integration_id/CephCreatePoolSample"]
+invalid = ["", ":id/GetVol", "5291c055-70d3-4450-9769-2f6",
+           "users/:id----------Sample",
+           ":id/CephCreatePoolSample"]
 
 table = {}
 imports = []
