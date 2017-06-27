@@ -114,10 +114,12 @@ for i in range(0, max_i):
         try:
             if table[key][i] not in rows:
                 rows[table[key][i]] = dict.fromkeys(table.keys(), "")
-            rows[table[key][i]][key] = table[key][i]
+            rows[table[key][i]][key] = "X"
         except:
             pass
+for i in list(rows.keys()):
+    rows[i]["API state"] = i
 
-print(",".join(table.keys()))
+print(",".join(rows[next(iter(rows))].keys()[::-1]))
 for i in sorted(rows):
-    print(",".join(rows[i].values()))
+    print(",".join(rows[i].values()[::-1]))
