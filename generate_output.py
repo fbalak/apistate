@@ -21,6 +21,8 @@ head = """
 </head>
 
 <body>
+<div style="margin:10px">
+<h1>API call coverage</h1>
 <table class="sortable">
 """
 print(head)
@@ -29,6 +31,7 @@ for line in sys.stdin:
 
 tail = """
 </table>
+</div>
 </body>
 </html>
 """

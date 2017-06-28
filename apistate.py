@@ -113,8 +113,8 @@ for i in range(0, max_i):
     for key in table.keys():
         try:
             if table[key][i] not in rows:
-                rows[table[key][i]] = dict.fromkeys(table.keys(), "")
-            rows[table[key][i]][key] = "X"
+                rows[table[key][i]] = dict.fromkeys(table.keys(), "No")
+            rows[table[key][i]][key] = "Yes"
         except:
             pass
 for i in list(rows.keys()):
