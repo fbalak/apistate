@@ -17,6 +17,9 @@ head = """
       font-weight: bold;
       cursor: default;
   }
+  .red {
+      background-color:#FF6347;
+  }
   </style>
 </head>
 
@@ -26,9 +29,19 @@ head = """
 <table class="sortable">
 """
 print(head)
+first = True
 for line in sys.stdin:
-    print("<tr><td>" + "</td><td>".join(line.split(",")) + "</td></tr>")
-
+    if first:
+        print("<thead>")
+        print("<tr><td>" + "</td><td>".join(line.split(",")) + "</td></tr>")
+        print("</thead>")
+        first = False
+        print("<tbody>")
+    else:
+        print("".join(["</td><td>" + x if x != "No" 
+              else "</td><td class='red'>" + x 
+              for x in line.split(",")]) + "</td></tr>")
+print("</tbody>")
 tail = """
 </table>
 </div>
