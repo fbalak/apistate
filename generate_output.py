@@ -8,7 +8,7 @@ head = """
   <meta charset="utf-8">
 
   <title>Tendrl API coverage</title>
-  <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+  <script type='text/javascript' src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
   <style type="text/css">
   /* Sortable tables */
   table.sortable thead {
@@ -38,9 +38,11 @@ for line in sys.stdin:
         first = False
         print("<tbody>")
     else:
-        print("".join(["</td><td>" + x if x != "No" 
+        row = "".join(["</td><td>" + x if x != "No" 
               else "</td><td class='red'>" + x 
-              for x in line.split(",")]) + "</td></tr>")
+              for x in line.split(",")]) + "</td></tr>"
+        row = "<tr>" + row[5:]
+        print(row)
 print("</tbody>")
 tail = """
 </table>
