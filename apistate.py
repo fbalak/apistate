@@ -16,13 +16,14 @@ sources = [
         {"files": glob.glob(os.path.join(parser.parse_args().api, "docs", "*")),
             "pattern": 'api/1.0/',
             "type": "file",
-            "column": "documented",
+            "column": "Documented",
             "placement": "end"},
         {"files": glob.glob(os.path.join(
                 parser.parse_args().tests, "usmqe", "api", "tendrlapi", "*")),
             "pattern": 'pattern\s*=\s*"',
             "type": "file",
-            "column": "covered",
+            "column": "In QE framework",
+            "map_column": "In QE tests",
             "placement": "end",
             "mapping": "^\s*def (.*?)\(",
             "dict": {},
@@ -110,7 +111,10 @@ for source in sources:
                             pass
         if "dict" in source:
             #print(source["dict"])
-            table_key = "{}_map".format(source["column"])
+            if "map_column" in source:
+                table_key = source["map_column"]
+            else:
+                table_key = "{}_map".format(source["column"])
             table[table_key] = []
             for file_path in source['mapsearch']:
                 if os.path.isfile(file_path):
