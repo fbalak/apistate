@@ -23,7 +23,11 @@ sources = [
             "pattern": 'pattern\s*=\s*"',
             "type": "file",
             "column": "covered",
-            "placement": "end"},
+            "placement": "end",
+            "mapping": "^\s*def (.*?)\(",
+            "dict": {},
+            "mapsearch":glob.glob(os.path.join(
+                parser.parse_args().tests, "usmqe_tests", "api", "*", "*"))},
         ]
 
 aliases = [
@@ -46,12 +50,16 @@ imports = []
 for source in sources:
     if source["column"] not in table:
         table[source["column"]] = []
+    mapitem = None
 
     if source["type"] == "file":
+        if "mapping" in source:
+            mapsearch = re.compile(source["mapping"])
         for file_path in source['files']:
             if os.path.isfile(file_path):
                 with open(file_path, 'r') as f:
                     lines = f.readlines()
+                    mapkey = None
                     for i in range(0, len(lines)):
                         try:
                             line = "{}{}{}".format(
@@ -70,6 +78,12 @@ for source in sources:
                                     alias["repl"],
                                     line)
                             # print(line)
+                            if "mapping" in source:
+                                q = mapsearch.search(line)
+                                if q:
+                                    mapkey = q.group(1)
+                                    if mapkey not in source["dict"]:
+                                        source["dict"][mapkey] = None
                             p = re.search(source['pattern'], line)
                             if source['placement'] == "begin":
                                 url = line[:p.span()[1]]
@@ -89,9 +103,32 @@ for source in sources:
                             if url not in table[source["column"]]\
                             and url not in invalid:
                                 table[source["column"]].append(url)
+                                source["dict"][mapkey] = url
+
 
                         except Exception as err:
                             pass
+        if "dict" in source:
+            #print(source["dict"])
+            table_key = "{}_map".format(source["column"])
+            table[table_key] = []
+            for file_path in source['mapsearch']:
+                if os.path.isfile(file_path):
+                    with open(file_path, 'r') as f:
+                        lines = f.readlines()
+                        for line in lines:
+                            try:
+                                for key in source["dict"]:
+                                    url = None
+                                    p = re.search("{}\(".format(key), line)
+                                    if p:
+                                        url = source["dict"][key]
+                                    if url not in table[table_key]\
+                                    and url not in invalid and url:
+                                        table[table_key].append(url)
+                                        url = None
+                            except Exception as err:
+                                pass
 
     elif source["type"] == "web":
         data = requests.get(source["url"]).json()
