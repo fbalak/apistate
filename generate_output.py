@@ -41,8 +41,8 @@ for line in sys.stdin:
         first = False
         print("<tbody>")
     else:
-        row = "".join(["</td><td class='green'>" + x if x == "Yes" 
-              else "</td><td class='red'>" + x if x == "No"
+        row = "".join(["</td><td class='green'>" + x if x.strip() == "Yes" 
+              else "</td><td class='red'>" + x if x.strip() == "No"
               else "</td><td>" + x
               for x in line.split(",")]) + "</td></tr>"
         row = "<tr>" + row[5:]
