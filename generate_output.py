@@ -18,7 +18,10 @@ head = """
       cursor: default;
   }
   .red {
-      background-color:#FF6347;
+      background-color:#FA8072;
+  }
+  .green {
+      background-color:#7CFC00;
   }
   </style>
 </head>
@@ -38,8 +41,9 @@ for line in sys.stdin:
         first = False
         print("<tbody>")
     else:
-        row = "".join(["</td><td>" + x if x != "No" 
-              else "</td><td class='red'>" + x 
+        row = "".join(["</td><td class='green'>" + x if x == "Yes" 
+              else "</td><td class='red'>" + x if x == "No"
+              else "</td><td>" + x
               for x in line.split(",")]) + "</td></tr>"
         row = "<tr>" + row[5:]
         print(row)
