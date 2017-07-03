@@ -17,6 +17,7 @@ sources = [
             "pattern": 'api/1.0/',
             "type": "file",
             "column": "Documented",
+            "z-index": 3,
             "placement": "end"},
         {"files": glob.glob(os.path.join(
                 parser.parse_args().tests, "usmqe", "api", "tendrlapi", "*")),
@@ -24,6 +25,8 @@ sources = [
             "type": "file",
             "column": "In QE framework",
             "map_column": "In QE tests",
+            "z-index": 4,
+            "map_z-index": 5,
             "placement": "end",
             "mapping": "^\s*def (.*?)\(",
             "dict": {},
@@ -49,6 +52,8 @@ table = {}
 imports = []
 
 for source in sources:
+    if "z-index" not in source:
+        source["z-index"] = 0
     if source["column"] not in table:
         table[source["column"]] = []
     mapitem = None
@@ -159,6 +164,7 @@ for i in range(0, max_i):
         except:
             pass
 
+
 vheader_name = "API state"
 for i in list(rows.keys()):
     rows[i][vheader_name] = i
@@ -166,8 +172,21 @@ for i in list(rows.keys()):
 header = rows[next(iter(rows))].keys()
 vheader_idx = header.index(vheader_name)
 del header[vheader_idx]
-print("{},".format(vheader_name) + ",".join(header[:]))
+z_indexes = [{"column":x, "z-index": 0} for x in header]
+for z in z_indexes:
+    for source in sources:
+        if source["column"] == z["column"] and source["z-index"] is not None:
+            z["z-index"] = source["z-index"]
+        if "map_column" in source and source["map_column"] == z["column"] and source["map_z-index"] is not None:
+            z["z-index"] = source["map_z-index"]
+header_sorted =  [x["column"] for x in sorted(z_indexes, key=lambda k: k["z-index"])]
+value_indexes = [header_sorted.index(x) for x in header]
+print("{},".format(vheader_name) + ",".join(header_sorted))
 for i in sorted(rows):
     row_values = rows[i].values()
     vheader_value = row_values.pop(vheader_idx)
-    print("{},".format(vheader_value) + ",".join(row_values))
+    row_values = [x for x in row_values]
+    row_values_sorted = [None] * len(row_values)
+    for idx, value in zip(value_indexes, row_values):
+        row_values_sorted[idx] = value
+    print("{},".format(vheader_value) + ",".join(row_values_sorted))
