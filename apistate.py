@@ -154,9 +154,16 @@ for i in range(0, max_i):
             rows[table[key][i]][key] = "Yes"
         except:
             pass
-for i in list(rows.keys()):
-    rows[i]["API state"] = i
 
-print(",".join(rows[next(iter(rows))].keys()[::-1]))
+vheader_name = "API state"
+for i in list(rows.keys()):
+    rows[i][vheader_name] = i
+
+header = rows[next(iter(rows))].keys()
+vheader_idx = header.index(vheader_name)
+del header[vheader_idx]
+print("{},".format(vheader_name) + ",".join(header[:]))
 for i in sorted(rows):
-    print(",".join(rows[i].values()[::-1]))
+    row_values = rows[i].values()
+    vheader_value = row_values.pop(vheader_idx)
+    print("{},".format(vheader_value) + ",".join(row_values))
