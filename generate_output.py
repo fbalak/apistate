@@ -8,7 +8,7 @@ head = """
   <meta charset="utf-8">
 
   <title>Tendrl API coverage</title>
-  <script type='text/javascript' src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+  <script type='text/javascript' src="js/sorttable.js"></script>
   <style type="text/css">
   /* Sortable tables */
   table.sortable thead {
